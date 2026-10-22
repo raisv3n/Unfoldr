@@ -124,6 +124,14 @@ function renderBlock(b: Block, ctx: RenderContext): string {
     }
     case 'embed': {
       const link = resolveLink(ctx, { kind: 'external', url: b.url });
+      if (b.provider === 'youtube') {
+        const label = b.caption?.length ? renderRichText(b.caption, ctx) : 'YouTube video';
+        const alt = b.caption?.length ? b.caption.map((r) => (r.type === 'equation' ? r.expression : r.text)).join('') : 'YouTube video';
+        const thumb = resolveAsset(ctx, b.thumbnail?.assetId);
+        // No player iframe: the archive stays offline and script-free; the thumbnail links to the video.
+        const img = thumb && link ? `<a href="${escapeHtml(link.href)}" class="video-thumb" rel="noopener noreferrer nofollow"><img src="${escapeHtml(thumb)}" alt="${escapeHtml(`▶ ${alt}`)}" loading="lazy"><span class="play" aria-hidden="true">▶</span></a>` : '';
+        return `<figure class="embed video"${idAttr(b)}>${img}<figcaption>▶ ${linkTag(link, label)}</figcaption></figure>`;
+      }
       const cap = b.caption?.length ? `<div>${renderRichText(b.caption, ctx)}</div>` : '';
       return `<div class="embed"${idAttr(b)}>Embedded content: ${linkTag(link, escapeHtml(b.url))}${cap}</div>`;
     }

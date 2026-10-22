@@ -41,7 +41,8 @@
     "https://prod-files-secure.s3.us-west-2.amazonaws.com/*",
     "https://s3.us-west-2.amazonaws.com/*",
     "https://*.notionusercontent.com/*",
-    "https://*.notion-static.com/*"
+    "https://*.notion-static.com/*",
+    "https://i.ytimg.com/*"
   ],
   "optional_host_permissions": [
     "https://*/*"

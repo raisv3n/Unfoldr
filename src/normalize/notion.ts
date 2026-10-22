@@ -6,6 +6,7 @@ import { canonicalNotionUrl, normalizeNotionId, parseNotionUrl } from '../shared
 import type { AssetRef, Block, DatabaseEntry, ExportPage, RichText } from '../shared/model';
 import type { RawBlock, RawPage, RawTableCollection } from '../shared/raw';
 import { safeLinkHref } from '../shared/url-safety';
+import { youTubeThumbnailUrl, youTubeVideoId, youTubeWatchUrl } from '../shared/youtube';
 import { addReference, classifyLink, normalizeRichText, plainText, type NormalizeContext } from './common';
 
 interface Ctx extends NormalizeContext {
@@ -32,6 +33,19 @@ function addAsset(ctx: Ctx, url: string | undefined, kind: AssetRef['kind'], nam
   const ref = makeAssetRef(url, kind, name);
   if (!ctx.assets.some((a) => a.assetId === ref.assetId)) ctx.assets.push(ref);
   return ref;
+}
+
+/** Embed block; YouTube videos get a canonical watch link and a thumbnail asset. */
+function embedBlock(id: string, url: string, caption: RichText[] | undefined, ctx: Ctx, label?: string): Block {
+  const videoId = youTubeVideoId(url);
+  if (!videoId) {
+    classifyLink(url, ctx, 'link', id, label);
+    return { id, type: 'embed', url, caption };
+  }
+  const watch = youTubeWatchUrl(videoId);
+  classifyLink(watch, ctx, 'link', id, label);
+  const thumbnail = addAsset(ctx, youTubeThumbnailUrl(videoId), 'image', `youtube-${videoId}`);
+  return { id, type: 'embed', url: watch, caption, provider: 'youtube', thumbnail };
 }
 
 function collectionEntries(col: RawTableCollection, ctx: Ctx, parentBlockId: string): DatabaseEntry[] {
@@ -166,19 +180,15 @@ function normalizeBlock(raw: RawBlock, ctx: Ctx): Block | undefined {
       return { id, type: 'file', url: '', name: raw.name ?? raw.type, caption };
     }
     const isHostedFile = /notion\.so|amazonaws\.com|notion\.site|notion\.com|notion-static\.com/i.test(new URL(url).hostname);
-    if (!isHostedFile) {
-      // Embedded third-party media (YouTube, etc.) is linked, not downloaded.
-      classifyLink(url, ctx, 'link', id, raw.name);
-      return { id, type: 'embed', url, caption };
-    }
+    // Third-party media (YouTube, etc.) is linked, not downloaded.
+    if (!isHostedFile) return embedBlock(id, url, caption, ctx, raw.name);
     const asset = addAsset(ctx, url, fileKind, raw.name);
     return { id, type: 'file', asset, url, name: raw.name ?? raw.type, caption };
   }
   if (EMBED_TYPES.has(raw.type)) {
     const url = raw.href ? safeLinkHref(raw.href) : undefined;
     if (!url) return { id, type: 'unsupported', sourceType: raw.type, text: [] };
-    classifyLink(url, ctx, 'link', id, raw.name);
-    return { id, type: 'embed', url, caption };
+    return embedBlock(id, url, caption, ctx, raw.name);
   }
   if (DROP_TYPES.has(raw.type)) return undefined;
 

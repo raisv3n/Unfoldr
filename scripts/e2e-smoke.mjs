@@ -20,6 +20,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
 const HOST = 'e2e.notion.site';
 const EXT_HOST = 'faq.example-e2e.com';
+const YT_HOST = 'i.ytimg.com';
+const YT_ID = 'dQw4w9WgXcQ';
 const chromePath = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 if (!existsSync(join(dist, 'manifest.json'))) throw new Error('dist/ not found — run `npm run build` first');
 
@@ -97,6 +99,7 @@ const pages = {
   [R]: () =>
     shell(R, 'Fixture Root', [
       text(`Intro with <a class="notion-link-token" href="/Notes-${A}">a link to notes</a>, a mention <span class="notion-page-mention-token notion-text-mention-token"><a href="/Secret-${B}">Secret Page</a></span> and <a class="notion-link-token" href="https://example.com/outside">an external link</a>.`),
+      `<div data-block-id="${bid()}" class="notion-selectable notion-video-block"><a href="https://youtu.be/${YT_ID}">Video</a></div>`,
       toggle('Collapsed question', text('Hidden answer text') + toggle('Nested collapsed', text('Deep hidden answer'))),
       childPage(C, 'Notes'),
       `<div data-block-id="${bid()}" class="notion-selectable notion-image-block"><div><img src="/image/https%3A%2F%2Fexample.com%2Fpic.png?table=block&amp;id=x&amp;width=800" alt="Pixel"></div></div>`,
@@ -131,6 +134,14 @@ const requests = [];
 function handler(req, res) {
   const url = new URL(req.url, `https://${HOST}`);
   requests.push(url.pathname);
+  if (req.headers.host?.startsWith(YT_HOST)) {
+    if (url.pathname === `/vi/${YT_ID}/hqdefault.jpg`) {
+      res.writeHead(200, { 'content-type': 'image/jpeg' });
+      return res.end(PNG);
+    }
+    res.writeHead(404);
+    return res.end();
+  }
   if (req.headers.host?.startsWith(EXT_HOST)) {
     if (url.pathname === '/faq') {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
@@ -200,7 +211,7 @@ const browser = await puppeteer.launch({
   protocolTimeout: 60000,
   enableExtensions: [useExternalBuild ? distExt : dist],
   userDataDir: profile,
-  args: [`--host-resolver-rules=MAP ${HOST} 127.0.0.1:${port}, MAP ${EXT_HOST} 127.0.0.1:${port}`, '--ignore-certificate-errors', '--no-first-run', '--no-default-browser-check'],
+  args: [`--host-resolver-rules=MAP ${HOST} 127.0.0.1:${port}, MAP ${EXT_HOST} 127.0.0.1:${port}, MAP ${YT_HOST} 127.0.0.1:${port}`, '--ignore-certificate-errors', '--no-first-run', '--no-default-browser-check'],
 });
 
 let exitCode = 0;
@@ -271,6 +282,10 @@ try {
     check('database entries exported', names.includes(`notion-export/pages/task-d--${D}.html`) && names.includes(`notion-export/pages/task-e--${E}.md`));
     const img = names.find((n) => n.startsWith('notion-export/assets/') && n.endsWith('.png'));
     check('image asset downloaded and referenced relatively', !!img && !!rootHtml?.includes(`src="../${img.replace('notion-export/', '')}"`));
+    const thumb = names.find((n) => n.startsWith(`notion-export/assets/youtube-${YT_ID.toLowerCase()}--`) && n.endsWith('.jpg'));
+    check('YouTube thumbnail downloaded into assets/', !!thumb);
+    check('Markdown shows YouTube video as a clickable local thumbnail', !!thumb && !!rootMd?.includes(`[![▶ YouTube video](../${thumb.replace('notion-export/', '')})](https://www.youtube.com/watch?v=${YT_ID})`));
+    check('HTML shows the thumbnail linking to the video, no iframe', !!rootHtml?.includes(`href="https://www.youtube.com/watch?v=${YT_ID}" class="video-thumb"`) && !/<iframe/i.test(rootHtml ?? ''));
     const manifest = JSON.parse(await read('notion-export/manifest.json'));
     check('manifest root page ID', manifest.root.pageId === R);
     check('manifest records cycle edge A → root', manifest.relationships.some((e) => e.from === A && e.to === R));

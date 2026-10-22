@@ -42,6 +42,10 @@ details > .toggle-body { padding-left: 1.4em; border-left: 2px solid var(--borde
 .columns { display: flex; gap: 24px; flex-wrap: wrap; } .columns > .column { flex: 1 1 220px; min-width: 0; }
 .page-link { margin: 0.3em 0; } .page-link .icon { margin-right: 0.3em; }
 .bookmark, .embed { border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; margin: 0.8em 0; word-break: break-all; }
+.embed.video { border: 0; padding: 0; } .video-thumb { position: relative; display: inline-block; max-width: 100%; }
+.video-thumb img { display: block; max-width: 100%; border-radius: 6px; }
+.video-thumb .play { position: absolute; inset: 0; margin: auto; width: 64px; height: 44px; border-radius: 12px; background: rgba(0,0,0,.7);
+  color: #fff; font-size: 22px; line-height: 44px; text-align: center; }
 .bookmark .desc { color: var(--muted); font-size: 14px; }
 .mention { background: var(--soft); border-radius: 4px; padding: 0 0.25em; }
 .equation { overflow-x: auto; }

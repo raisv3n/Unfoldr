@@ -75,6 +75,19 @@ notion-export/
   mention, link-to-page, database entry, synced block, external), assets (path, original URL, MIME,
   size, status), external pages, missing pages, unresolved references, limits hit and summary counts.
 
+### Videos and embeds
+
+Videos can't be stored in the archive (YouTube streams them). Each YouTube video (`youtube.com`,
+`youtu.be`, `/embed/`, `/shorts/`, `/live/`) is exported as a **clickable thumbnail**: the thumbnail is
+downloaded into `assets/` and links to the video. It shows offline and in viewers that block embedded
+players (e.g. Renderooo, GitHub). Clicking it opens the video in your browser. In Markdown:
+
+```md
+[![▶ YouTube video](../assets/youtube-dqw4w9wgxcq--1a2b3c4d5e6f7a8b.jpg)](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
+```
+
+Other embeds (Figma, Google Maps, tweets, …) are exported as links.
+
 ## Complete vs. partial
 
 An export is **complete** only if every discovered page in scope was retrieved with no extraction

@@ -173,8 +173,16 @@ function renderBlockMd(b: Block, ctx: MdCtx): string {
       return `📎 ${orig ? mdLink(name, { href: orig, local: false }) : name} *(not downloaded)*${cap}`;
     }
     case 'embed': {
+      const link = resolveLink(ctx, { kind: 'external', url: b.url });
+      if (b.provider === 'youtube') {
+        const label = (b.caption?.length ? plain(b.caption).replace(/\s+/g, ' ').trim() : '') || 'YouTube video';
+        const thumb = resolveAsset(ctx, b.thumbnail?.assetId);
+        // A clickable thumbnail: shows offline and in viewers that block embedded players.
+        if (thumb && link) return `[![▶ ${escapeMd(label)}](${thumb})](${link.href})\n\n▶ ${mdLink(escapeMd(label), link)}`;
+        return `▶ ${mdLink(escapeMd(label), link)}`;
+      }
       const cap = b.caption?.length ? ` — ${renderRichTextMd(b.caption, ctx)}` : '';
-      return `Embedded content: ${mdLink(escapeMd(b.url), resolveLink(ctx, { kind: 'external', url: b.url }))}${cap}`;
+      return `Embedded content: ${mdLink(escapeMd(b.url), link)}${cap}`;
     }
     case 'bookmark': {
       const t = mdLink(escapeMd(b.title || b.url), resolveLink(ctx, { kind: 'external', url: b.url }));

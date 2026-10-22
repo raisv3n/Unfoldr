@@ -13,6 +13,7 @@ telemetry calls, and uses no AI or cloud services. Archives are written only to 
 | `offscreen` | Service workers cannot create blob URLs; an offscreen document turns the stored ZIP into a blob URL for `chrome.downloads`. |
 | Host access: `notion.so`, `*.notion.com`, `*.notion.site` | Read Notion pages in crawler tabs using your existing session. |
 | Host access: `file.notion.so`, `*.notionusercontent.com`, `*.notion-static.com`, Notion's S3 buckets | Download images and attachments. Notion's `/image/` proxy redirects to `img.notionusercontent.com`. |
+| Host access: `i.ytimg.com` | Download YouTube video thumbnails so embedded videos appear as clickable previews. Requests carry no cookies. |
 | Optional: `https://*/*` | **Only requested if you enable "Capture linked external websites".** Chrome shows a prompt; you can revoke it from the popup (Advanced → Revoke) or `chrome://extensions`. External hosts cannot be known in advance, so a narrower grant is not possible. |
 
 Not requested: `tabs`, `cookies`, `webRequest`, `debugger`, `<all_urls>` (by default), `history`, `bookmarks`.
@@ -35,7 +36,8 @@ All Notion and website content is treated as untrusted:
   build output only from that model and escape every string (`escapeHtml` / `escapeMd`).
 - **No scripts in the archive.** Exported HTML contains no `<script>`. Every page also carries a
   `Content-Security-Policy` meta tag with `script-src 'none'`, `object-src 'none'`, `frame-src 'none'`.
-  Embeds are written as links, never iframes.
+  Embeds are written as links, never iframes. YouTube videos become a downloaded thumbnail image
+  that links to the video.
 - **URL scheme allowlist.** Only `http:`, `https:` and `mailto:` links are written. `javascript:`, `data:`,
   `file:` and links with embedded credentials are dropped, and a warning is recorded.
 - **SVG.** SVG assets that contain scripts, event handlers, `foreignObject`, or external references are refused.
@@ -49,8 +51,8 @@ All Notion and website content is treated as untrusted:
 Every fetch goes through `checkFetchUrl` (`src/shared/url-safety.ts`):
 
 - `https:` only. Standard ports only. No credentials in URLs.
-- Host must be in the request class's allowlist (Notion hosts for assets; any public host only when
-  external capture is enabled and permitted).
+- Host must be in the request class's allowlist (Notion hosts and `i.ytimg.com` for assets; any public
+  host only when external capture is enabled and permitted). Cookies are sent only to Notion hosts.
 - Blocked: `localhost`, private and reserved IPv4 ranges (10/8, 127/8, 169.254/16 incl. cloud metadata,
   172.16/12, 192.168/16, 100.64/10, 0/8, multicast), IPv6 loopback, link-local and ULA, IPv4-mapped IPv6,
   single-label hosts, and internal suffixes (`.local`, `.internal`, `.lan`, `.home.arpa`, …).

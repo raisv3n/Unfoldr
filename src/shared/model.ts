@@ -93,7 +93,14 @@ export type Block =
   | (BlockBase & { type: 'table'; rows: RichText[][][]; hasHeaderRow: boolean })
   | (BlockBase & { type: 'image'; asset?: AssetRef; url: string; alt?: string; caption?: RichText[] })
   | (BlockBase & { type: 'file'; asset?: AssetRef; url: string; name: string; caption?: RichText[] })
-  | (BlockBase & { type: 'embed'; url: string; caption?: RichText[] })
+  | (BlockBase & {
+      type: 'embed';
+      url: string;
+      caption?: RichText[];
+      /** Recognized video provider; renderers show `thumbnail` as a clickable preview. */
+      provider?: 'youtube';
+      thumbnail?: AssetRef;
+    })
   | (BlockBase & { type: 'bookmark'; url: string; title?: string; description?: string })
   | (BlockBase & { type: 'child_page'; pageId?: PageId; url: string; title: string; icon?: string })
   | (BlockBase & { type: 'link_to_page'; pageId?: PageId; url: string; title: string })

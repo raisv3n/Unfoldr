@@ -85,7 +85,8 @@ describe('Notion DOM extraction + normalization', () => {
     expect(table?.type === 'table' && table.hasHeaderRow).toBe(true);
     expect(table?.type === 'table' && table.rows.length).toBe(2);
     const embed = byType('embed')[0];
-    expect(embed?.type === 'embed' && embed.url).toContain('youtube.com');
+    expect(embed).toMatchObject({ provider: 'youtube', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' });
+    expect(embed?.type === 'embed' && embed.thumbnail?.fetchUrl).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg');
   });
 
   it('collects relationships of every kind', () => {
@@ -112,7 +113,7 @@ describe('Notion DOM extraction + normalization', () => {
   });
 
   it('deduplicates assets that differ only by volatile params', () => {
-    const images = page.assets.filter((a) => a.kind === 'image');
+    const images = page.assets.filter((a) => a.kind === 'image' && !a.name?.startsWith('youtube-'));
     expect(images.length).toBe(1);
     expect(images[0]?.originalUrl).toBe('https://s3-us-west-2.amazonaws.com/secure.notion-static.com/abc/diagram.png');
     expect(page.assets.some((a) => a.kind === 'file' && a.name === 'report.pdf')).toBe(true);

@@ -7,6 +7,7 @@ import { AssetManager, type AssetRecord, type AssetStore } from '../assets/asset
 import { Crawler, type CrawlOptions, type CrawlSnapshot, type PageFetcher } from '../crawler/crawler';
 import { idbDelete, idbDeletePrefix, idbGet, idbGetPrefix, idbPut } from '../shared/idb';
 import { isNotionAssetHost } from '../shared/ids';
+import { isYouTubeThumbnailHost } from '../shared/youtube';
 import type { JobProgress } from '../shared/messages';
 import type { ExportPage } from '../shared/model';
 import type { ExportSettings } from '../shared/settings';
@@ -161,7 +162,7 @@ export class ExportJob {
           maxAssetBytes: settings.maxAssetMB * 1024 * 1024,
           maxTotalBytes: settings.maxTotalAssetMB * 1024 * 1024,
           concurrency: 3,
-          policy: { allowHost: (h) => isNotionAssetHost(h) || externalGranted },
+          policy: { allowHost: (h) => isNotionAssetHost(h) || isYouTubeThumbnailHost(h) || externalGranted },
           withCredentials: (h) => isNotionAssetHost(h),
           inTabFallback: (url, max) => fetchAssetInTab(pool, url, max),
           onProgress: () => this.emit(),
