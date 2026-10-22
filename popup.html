@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Notion Exporter</title>
+  <link rel="stylesheet" href="/src/popup/popup.css">
+</head>
+<body>
+  <header class="top">
+    <img src="/icons/icon32.png" alt="" width="20" height="20">
+    <h1>Notion Exporter</h1>
+  </header>
+
+  <section id="page-card" class="card" aria-live="polite">
+    <div id="page-title" class="page-title">Checking current tab…</div>
+    <div id="page-url" class="page-url"></div>
+    <div id="page-status" class="badge neutral">Checking…</div>
+  </section>
+
+  <section id="resume-banner" class="banner" hidden>
+    <p id="resume-text">A previous export was interrupted.</p>
+    <div class="row">
+      <button id="resume-btn" type="button" class="primary small">Resume</button>
+      <button id="discard-btn" type="button" class="small">Discard</button>
+    </div>
+  </section>
+
+  <form id="export-form" novalidate>
+    <fieldset class="formats">
+      <legend>Format</legend>
+      <label><input type="radio" name="format" value="html" checked> HTML</label>
+      <label><input type="radio" name="format" value="markdown"> Markdown</label>
+      <label><input type="radio" name="format" value="both"> Both</label>
+    </fieldset>
+
+    <div class="toggles">
+      <label class="switch"><input type="checkbox" id="followLinks" checked><span>Follow linked pages &amp; mentions</span></label>
+      <label class="switch"><input type="checkbox" id="includeChildPages" checked><span>Include child pages</span></label>
+      <label class="switch"><input type="checkbox" id="includeDatabaseEntries" checked><span>Include database entries</span></label>
+      <label class="switch"><input type="checkbox" id="expandToggles" checked><span>Capture hidden toggle content</span></label>
+      <p class="hint" id="toggle-hint">Collapsed toggles are opened in the export window so their content is included.</p>
+      <label class="switch"><input type="checkbox" id="captureExternal"><span>Capture linked external websites</span></label>
+      <p class="hint" id="external-hint" hidden>Requires permission to read websites. Only pages linked from your Notion pages are visited; forms and buttons are never submitted.</p>
+    </div>
+
+    <label class="field" id="toggle-mode-field" hidden>
+      <span>Markdown expandable sections</span>
+      <select id="markdownToggleMode">
+        <option value="interactive">Interactive (&lt;details&gt; blocks)</option>
+        <option value="portable">Portable (headings + content)</option>
+      </select>
+    </label>
+
+    <details class="advanced">
+      <summary>Advanced</summary>
+      <div class="grid">
+        <label class="field"><span>Max pages</span><input type="number" id="maxPages" min="1" max="5000"></label>
+        <label class="field"><span>Max depth</span><input type="number" id="maxDepth" min="0" max="100"></label>
+        <label class="field"><span>Concurrent pages</span><input type="number" id="concurrency" min="1" max="4"></label>
+        <label class="field"><span>Retries per page</span><input type="number" id="maxRetries" min="0" max="5"></label>
+        <label class="field"><span>Max assets</span><input type="number" id="maxAssets" min="0" max="20000"></label>
+        <label class="field"><span>MB per asset</span><input type="number" id="maxAssetMB" min="1" max="500"></label>
+        <label class="field"><span>Total asset MB</span><input type="number" id="maxTotalAssetMB" min="1" max="20000"></label>
+        <label class="field"><span>Page timeout (s)</span><input type="number" id="pageTimeoutSec" min="20" max="900"></label>
+      </div>
+      <label class="switch"><input type="checkbox" id="downloadAssets" checked><span>Download images &amp; files</span></label>
+      <label class="switch"><input type="checkbox" id="restoreToggles" checked><span>Re-collapse toggles after reading</span></label>
+      <label class="field">
+        <span>Crawl pages in</span>
+        <select id="crawlSurface">
+          <option value="window">Separate export window (recommended)</option>
+          <option value="background-tab">Background tabs</option>
+        </select>
+      </label>
+      <button type="button" id="revoke-external" class="link">Revoke external website access</button>
+    </details>
+
+    <button type="submit" id="start-btn" class="primary wide" disabled>Export</button>
+  </form>
+
+  <section id="progress" hidden aria-live="polite">
+    <div class="phase" id="phase-label">Starting…</div>
+    <progress id="progress-bar" max="100" value="0"></progress>
+    <dl class="stats">
+      <div><dt>Pages done</dt><dd id="s-pages">0</dd></div>
+      <div><dt>Queued</dt><dd id="s-queued">0</dd></div>
+      <div><dt>Failed</dt><dd id="s-failed">0</dd></div>
+      <div><dt>Assets</dt><dd id="s-assets">0</dd></div>
+    </dl>
+    <div class="current" id="current-url"></div>
+    <div class="message" id="progress-message"></div>
+    <button type="button" id="cancel-btn" class="danger wide">Cancel</button>
+  </section>
+
+  <section id="result" hidden aria-live="polite">
+    <div id="outcome" class="outcome"></div>
+    <ul id="outcome-details" class="details-list"></ul>
+    <div class="row">
+      <button type="button" id="download-again" class="small">Download ZIP again</button>
+      <button type="button" id="new-export" class="primary small">New export</button>
+    </div>
+    <details id="report-box">
+      <summary>Export report</summary>
+      <pre id="report-text"></pre>
+    </details>
+  </section>
+
+  <p id="error" class="error" role="alert" hidden></p>
+  <script type="module" src="/src/popup/popup.ts"></script>
+</body>
+</html>
