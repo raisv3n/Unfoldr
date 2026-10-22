@@ -13,3 +13,4 @@ coverage/
 *.crx
 snapshots/
 *.local.html
+release/

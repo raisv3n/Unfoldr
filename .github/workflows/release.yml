@@ -1,0 +1,68 @@
+# Builds Unfoldr and publishes a GitHub Release whenever a version tag is pushed:
+#   (bump "version" in public/manifest.json and package.json), then
+#   git tag v0.2.0 && git push origin v0.2.0
+# Notes come from .github/release-notes/<tag>.md if it exists, otherwise from the commit log.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build and release, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0 # release notes read the commit log since the previous tag
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (exact lockfile versions)
+        run: npm ci
+
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Typecheck, test and build
+        run: |
+          npm test
+          npm run build
+
+      - name: Package
+        run: |
+          RELEASE_TAG="$TAG" node scripts/package.mjs
+          VERSION="${TAG#v}"
+          ZIP="Unfoldr-$VERSION-chrome.zip"
+          NOTES=".github/release-notes/$TAG.md"
+          if [ -f "$NOTES" ]; then cp "$NOTES" release/notes.md; else
+            PREV=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
+            git log --pretty='- %s' ${PREV:+$PREV..}"$TAG" > release/notes.md
+          fi
+          printf '\n**SHA-256** (`%s`): `%s`\n' "$ZIP" "$(cut -d' ' -f1 "release/$ZIP.sha256")" >> release/notes.md
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Publish release
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "release/$ZIP" "release/$ZIP.sha256" --clobber
+            gh release edit "$TAG" --notes-file release/notes.md
+          else
+            gh release create "$TAG" "release/$ZIP" "release/$ZIP.sha256" --title "Unfoldr ${TAG#v}" --notes-file release/notes.md --verify-tag
+          fi

@@ -2,7 +2,7 @@
   "name": "unfoldr",
   "version": "0.1.0",
   "private": true,
-  "description": "Unfoldr — offline HTML & Markdown exporter for Notion (Chrome extension). Not affiliated with Notion Labs, Inc.",
+  "description": "Unfoldr \u2014 offline HTML & Markdown exporter for Notion (Chrome extension). Not affiliated with Notion Labs, Inc.",
   "type": "module",
   "scripts": {
     "build": "npm run typecheck && vite build && node scripts/build-content.mjs",
@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "node scripts/e2e-smoke.mjs",
-    "watch": "node scripts/watch.mjs"
+    "watch": "node scripts/watch.mjs",
+    "package": "npm run build && node scripts/package.mjs"
   },
   "devDependencies": {
     "@types/chrome": "0.3.6",

@@ -13,21 +13,41 @@ cloud services.
 
 ## Install
 
-Requirements: macOS (or any OS with Chrome 120+), Node.js 20+ (developed with Node 24) and npm.
+### From a release (no build tools needed)
+
+1. Download **`Unfoldr-<version>-chrome.zip`** from the [latest release](https://github.com/raisv3n/Unfoldr/releases/latest)
+   and unzip it. You get an `Unfoldr` folder. Keep it somewhere permanent: Chrome loads the extension
+   from that folder every time it starts.
+2. Open `chrome://extensions` and turn on **Developer mode** (top right).
+3. Click **Load unpacked** and select the `Unfoldr` folder.
+4. Pin "Unfoldr" from the puzzle-piece menu.
+
+To update, download the new release, replace the folder's contents, and click the reload icon on the
+extension's card. Each release lists a SHA-256 checksum; to verify your download:
+`shasum -a 256 Unfoldr-<version>-chrome.zip`.
+
+### From source
+
+Requirements: Chrome 120+, Node.js 20+ (developed with Node 24) and npm.
 
 ```bash
 npm install
 npm run build        # typecheck + production build into dist/
 ```
 
-Load it in Chrome:
+Then load the `dist/` folder with **Load unpacked** as above. After rebuilding, click the reload icon on
+the extension's card. While editing, `npm run watch` rebuilds `dist/` automatically on every save.
 
-1. Open `chrome://extensions`.
-2. Turn on **Developer mode** (top right).
-3. Click **Load unpacked** and select the `dist/` folder.
-4. Pin "Unfoldr" from the puzzle-piece menu.
+### Publishing a release (maintainer)
 
-After rebuilding, click the reload icon on the extension's card. While editing, `npm run watch` rebuilds `dist/` automatically on every save.
+1. Bump `"version"` in both `public/manifest.json` and `package.json` (they must match).
+2. Optionally write `.github/release-notes/v<version>.md`; otherwise the notes list the commits since the
+   previous release.
+3. Commit, then `git tag v<version> && git push origin main v<version>`.
+
+GitHub Actions (`.github/workflows/release.yml`) installs from the lockfile, audits, runs the tests,
+builds, and publishes `Unfoldr-<version>-chrome.zip` plus its `.sha256` to the release. To try the
+packaging locally: `npm run package` → `release/`.
 
 ## Use
 
