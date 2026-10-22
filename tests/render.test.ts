@@ -153,3 +153,19 @@ describe('Markdown renderer', () => {
     expect(interactive).toContain('> Quoted');
   });
 });
+
+describe('Markdown output stays inert in viewers that render raw HTML', () => {
+  it('neutralizes HTML in equations and icons', () => {
+    const evil = '<img src=x onerror=alert(1)>';
+    const page = mkPage(A, 'Page A', [
+      { id: 'e1', type: 'paragraph', text: [{ type: 'equation', expression: `x ${evil} y`, annotations: {} }] },
+      { id: 'e2', type: 'equation', expression: `a < b > c\n$$\n${evil}` },
+      { id: 'e3', type: 'callout', text: [t('note')], icon: '<script>' },
+    ]);
+    page.icon = '<b>';
+    const md = renderMarkdownPage(page, mkSite([page], 'md'), 'pages/x.md', { toggleMode: 'interactive' });
+    expect(md).not.toMatch(/(^|[^\\])<(img|script|b>)/m);
+    expect(md).toContain('$x \\lt img src=x onerror=alert(1)\\gt  y$');
+    expect(md).toContain('a \\lt  b \\gt  c');
+  });
+});

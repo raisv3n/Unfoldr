@@ -26,14 +26,14 @@ interface ContentState {
 
 declare global {
   interface Window {
-    __notionExporterInstalled?: boolean;
-    __notionExporterState?: ContentState;
+    __unfoldrInstalled?: boolean;
+    __unfoldrState?: ContentState;
   }
 }
 
 function state(): ContentState {
-  window.__notionExporterState ??= { opened: [], clickedLoadMore: new WeakSet(), maxBlockCount: 0, acc: new BlockAccumulator() };
-  return window.__notionExporterState;
+  window.__unfoldrState ??= { opened: [], clickedLoadMore: new WeakSet(), maxBlockCount: 0, acc: new BlockAccumulator() };
+  return window.__unfoldrState;
 }
 
 function scroller(): HTMLElement | null {
@@ -122,8 +122,8 @@ function restore(): { restored: number } {
   return { restored };
 }
 
-if (!window.__notionExporterInstalled) {
-  window.__notionExporterInstalled = true;
+if (!window.__unfoldrInstalled) {
+  window.__unfoldrInstalled = true;
   chrome.runtime.onMessage.addListener((msg: ContentCommand, _sender, sendResponse) => {
     if (!msg || msg.target !== 'notion-content') return false;
     switch (msg.cmd) {

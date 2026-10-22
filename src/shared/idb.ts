@@ -1,7 +1,7 @@
 // Minimal IndexedDB wrapper shared by the service worker and the offscreen document.
 // Stores: `kv` (job snapshots), `pages` (extracted pages), `blobs` (assets and finished ZIPs).
 
-const DB_NAME = 'notion-exporter';
+const DB_NAME = 'unfoldr';
 const DB_VERSION = 1;
 export type StoreName = 'kv' | 'pages' | 'blobs';
 

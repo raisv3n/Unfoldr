@@ -3,6 +3,7 @@
 import { escapeHtml } from '../render/html';
 import { escapeMd } from '../render/markdown';
 import type { JobOutcome } from '../shared/messages';
+import { safeLinkHref } from '../shared/url-safety';
 
 export interface ReportItem {
   title: string;
@@ -51,7 +52,10 @@ export function limitLabel(limit: string): string {
 
 function mdSection(title: string, items: ReportItem[], max = 500): string {
   if (!items.length) return '';
-  const rows = items.slice(0, max).map((i) => `| ${escapeMd(i.title)} | ${i.url ? `<${i.url}>` : ''} | ${escapeMd(i.detail)} |`);
+  const rows = items.slice(0, max).map((i) => {
+    const href = safeLinkHref(i.url);
+    return `| ${escapeMd(i.title)} | ${href ? `<${href}>` : escapeMd(i.url)} | ${escapeMd(i.detail)} |`;
+  });
   const more = items.length > max ? `\n\n…and ${items.length - max} more (see manifest.json).` : '';
   return `## ${title} (${items.length})\n\n| Page | Source URL | Details |\n| --- | --- | --- |\n${rows.join('\n')}${more}`;
 }
@@ -82,7 +86,11 @@ function htmlSection(title: string, items: ReportItem[], max = 500): string {
   if (!items.length) return '';
   const rows = items
     .slice(0, max)
-    .map((i) => `<tr><td>${escapeHtml(i.title)}</td><td>${i.url ? `<a href="${escapeHtml(i.url)}" class="external" rel="noopener noreferrer nofollow">${escapeHtml(i.url)}</a>` : ''}</td><td>${escapeHtml(i.detail)}</td></tr>`);
+    .map((i) => {
+      const href = safeLinkHref(i.url);
+      const link = href ? `<a href="${escapeHtml(href)}" class="external" rel="noopener noreferrer nofollow">${escapeHtml(i.url)}</a>` : escapeHtml(i.url);
+      return `<tr><td>${escapeHtml(i.title)}</td><td>${link}</td><td>${escapeHtml(i.detail)}</td></tr>`;
+    });
   return `<h2>${escapeHtml(title)} (${items.length})</h2><table><thead><tr><th>Page</th><th>Source URL</th><th>Details</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
 }
 

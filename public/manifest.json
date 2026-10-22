@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Notion Exporter (Offline Archive)",
-  "short_name": "Notion Exporter",
+  "name": "Unfoldr — offline HTML & Markdown exporter for Notion",
+  "short_name": "Unfoldr",
   "version": "0.1.0",
-  "description": "Export a Notion page and its connected pages to an offline HTML or Markdown ZIP archive using your existing browser session.",
+  "description": "Export a Notion page and its linked pages, collapsed toggles included, to an offline HTML or Markdown ZIP. Unofficial.",
   "minimum_chrome_version": "120",
   "action": {
-    "default_title": "Export Notion page",
+    "default_title": "Unfoldr — export this Notion page",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -39,7 +39,7 @@
     "https://*.notion.com/*",
     "https://*.notion.site/*",
     "https://prod-files-secure.s3.us-west-2.amazonaws.com/*",
-    "https://s3.us-west-2.amazonaws.com/*",
+    "https://s3.us-west-2.amazonaws.com/secure.notion-static.com/*",
     "https://*.notionusercontent.com/*",
     "https://*.notion-static.com/*",
     "https://i.ytimg.com/*"

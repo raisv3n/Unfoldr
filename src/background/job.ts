@@ -6,7 +6,7 @@ import { createZip } from '../archive/zip';
 import { AssetManager, type AssetRecord, type AssetStore } from '../assets/asset-manager';
 import { Crawler, type CrawlOptions, type CrawlSnapshot, type PageFetcher } from '../crawler/crawler';
 import { idbDelete, idbDeletePrefix, idbGet, idbGetPrefix, idbPut } from '../shared/idb';
-import { isNotionAssetHost } from '../shared/ids';
+import { isNotionAssetHost, isNotionCookieHost } from '../shared/ids';
 import { isYouTubeThumbnailHost } from '../shared/youtube';
 import type { JobProgress } from '../shared/messages';
 import type { ExportPage } from '../shared/model';
@@ -163,7 +163,8 @@ export class ExportJob {
           maxTotalBytes: settings.maxTotalAssetMB * 1024 * 1024,
           concurrency: 3,
           policy: { allowHost: (h) => isNotionAssetHost(h) || isYouTubeThumbnailHost(h) || externalGranted },
-          withCredentials: (h) => isNotionAssetHost(h),
+          // Signed file/CDN links need no cookies; send them only to Notion's own sites.
+          withCredentials: (h) => isNotionCookieHost(h),
           inTabFallback: (url, max) => fetchAssetInTab(pool, url, max),
           onProgress: () => this.emit(),
         },
@@ -241,7 +242,7 @@ export class ExportJob {
         limitsHit: [...new Set([...crawler.getLimitsHit(), ...this.assets.getLimitsHit()])],
         assets: this.assets.getRecords(),
         cancelled: this.cancelled,
-        generator: `Notion Exporter ${chrome.runtime.getManifest().version}`,
+        generator: `Unfoldr ${chrome.runtime.getManifest().version}`,
         getAssetBlob: (id) => idbGet<Blob>('blobs', `${this.init.id}|${id}`),
       });
       let lastPct = -10;

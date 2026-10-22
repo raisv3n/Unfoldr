@@ -184,7 +184,7 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? '  ✓' : '  ✗'} ${name}${ok || !detail ? '' : ` — ${detail}`}`);
 }
 
-const work = mkdtempSync(join(tmpdir(), 'notion-exporter-e2e-'));
+const work = mkdtempSync(join(tmpdir(), 'unfoldr-e2e-'));
 const downloads = join(work, 'downloads');
 const profile = join(work, 'profile');
 mkdirSync(downloads);

@@ -232,9 +232,9 @@ function buildManifest(input: ArchiveInput, outcome: JobOutcome, formats: Output
   const edges = input.edges.map((e) => ({ from: input.resolveKey(e.from), to: input.resolveKey(e.to), kind: e.kind, url: redactUrl(e.url), blockId: e.blockId }));
   const exported = new Set(input.pages.map((p) => p.key));
   return {
-    format: 'notion-exporter-archive',
+    format: 'unfoldr-archive',
     version: 1,
-    generator: input.generator ?? 'Notion Exporter Chrome extension',
+    generator: input.generator ?? 'Unfoldr Chrome extension',
     exportedAt: input.finishedAt,
     startedAt: input.startedAt,
     outcome,
@@ -342,5 +342,5 @@ export async function buildArchive(input: ArchiveInput): Promise<ArchiveOutput> 
   const manifest = buildManifest(input, outcome, formats, rootPage);
   add('manifest.json', `${JSON.stringify(manifest, null, 2)}\n`);
 
-  return { files, manifest, report, reportMarkdown, outcome, zipBaseName: `notion-export-${slugify(title, 'page')}-${stamp(input.finishedAt)}` };
+  return { files, manifest, report, reportMarkdown, outcome, zipBaseName: `unfoldr-${slugify(title, 'page')}-${stamp(input.finishedAt)}` };
 }

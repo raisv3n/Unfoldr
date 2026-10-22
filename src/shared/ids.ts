@@ -47,6 +47,12 @@ export function isNotionPageHost(hostname: string): boolean {
   );
 }
 
+/** Hosts that may receive the browser's Notion session cookies (Notion's own sites only). */
+export function isNotionCookieHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  return isNotionPageHost(h) || h === 'file.notion.so';
+}
+
 /** Hosts the extension may contact as part of a Notion export (pages and Notion-hosted files). */
 export function isNotionAssetHost(hostname: string): boolean {
   const h = hostname.toLowerCase();

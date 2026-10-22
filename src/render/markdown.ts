@@ -18,6 +18,14 @@ interface MdCtx extends RenderContext {
   headingBase: number;
 }
 
+/**
+ * TeX for `$…$` / `$$…$$`. `<` and `>` become `\lt` / `\gt` (same rendering in KaTeX and MathJax) so a
+ * viewer without math support can never see them as raw HTML tags.
+ */
+export function safeTex(expression: string): string {
+  return expression.replace(/</g, '\\lt ').replace(/>/g, '\\gt ');
+}
+
 /** Escapes Markdown control characters in literal text. */
 export function escapeMd(text: string): string {
   return text
@@ -50,7 +58,7 @@ function wrap(inner: string, marker: string): string {
 export function renderRichTextMd(rt: RichText[], ctx: RenderContext): string {
   return rt
     .map((r) => {
-      if (r.type === 'equation') return `$${r.expression.replace(/\$/g, '\\$')}$`;
+      if (r.type === 'equation') return `$${safeTex(r.expression).replace(/\$/g, '\\$')}$`;
       const a = r.annotations;
       let inner = a.code ? codeSpan(r.text) : escapeMd(r.text);
       if (!a.code) inner = inner.replace(/\n/g, '\\\n');
@@ -140,7 +148,7 @@ function renderBlockMd(b: Block, ctx: MdCtx): string {
     }
     case 'callout': {
       const kids = children(b, ctx);
-      const head = `${b.icon ? `${b.icon} ` : ''}${renderRichTextMd(b.text, ctx)}`;
+      const head = `${b.icon ? `${escapeMd(b.icon)} ` : ''}${renderRichTextMd(b.text, ctx)}`;
       return quote([head, kids].filter(Boolean).join('\n\n'));
     }
     case 'code': {
@@ -150,7 +158,7 @@ function renderBlockMd(b: Block, ctx: MdCtx): string {
     case 'divider':
       return '---';
     case 'equation':
-      return `$$\n${b.expression}\n$$`;
+      return `$$\n${safeTex(b.expression).replace(/^\$\$/gm, '\\$\\$')}\n$$`;
     case 'table': {
       if (!b.rows.length) return '';
       const cells = b.rows.map((r) => r.map((c) => tableCell(c, ctx)));
@@ -193,7 +201,7 @@ function renderBlockMd(b: Block, ctx: MdCtx): string {
       const link = resolvePageLink(ctx, b.pageId, b.url);
       const icon = b.type === 'child_page' ? (b.icon ?? '📄') : '↗';
       const missing = link && !link.local ? ' *(not exported)*' : '';
-      return `${icon} ${mdLink(escapeMd(b.title), link)}${missing}`;
+      return `${escapeMd(icon)} ${mdLink(escapeMd(b.title), link)}${missing}`;
     }
     case 'child_database': {
       const title = b.url || b.pageId ? mdLink(escapeMd(b.title), resolvePageLink(ctx, b.pageId, b.url)) : escapeMd(b.title);
@@ -269,7 +277,7 @@ export function renderMarkdownPage(page: ExportPage, site: Site, currentPath: st
   const source = safeLinkHref(page.url);
   const parts: string[] = [
     front.join('\n'),
-    `# ${page.icon ? `${page.icon} ` : ''}${escapeMd(page.title)}`,
+    `# ${page.icon ? `${escapeMd(page.icon)} ` : ''}${escapeMd(page.title)}`,
     `> Source: ${source ? `<${source}>` : escapeMd(page.url)}  \n> [Index](${relativeTo(ctx, site.indexPath)}) · [Export report](${relativeTo(ctx, site.reportPath)})`,
   ];
   if (page.warnings.length) {
@@ -295,7 +303,7 @@ export function renderMarkdownIndex(site: Site, info: { title: string; exportedA
     const e = site.entries.get(key);
     if (!e || seen.has(key)) return;
     seen.add(key);
-    lines.push(`${'  '.repeat(depth)}- ${e.icon ? `${e.icon} ` : ''}[${escapeMd(e.title)}](${relativeTo(ctx, e.path)})${e.status === 'partial' ? ' *(partial)*' : ''}`);
+    lines.push(`${'  '.repeat(depth)}- ${e.icon ? `${escapeMd(e.icon)} ` : ''}[${escapeMd(e.title)}](${relativeTo(ctx, e.path)})${e.status === 'partial' ? ' *(partial)*' : ''}`);
     e.children.forEach((k) => walk(k, depth + 1));
   };
   if (site.rootKey) walk(site.rootKey, 0);

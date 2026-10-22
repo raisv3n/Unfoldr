@@ -1,4 +1,4 @@
-# Implementation Plan — Notion Exporter (Chrome MV3)
+# Implementation Plan — Unfoldr (Chrome MV3)
 
 Status legend: [x] done and verified · [~] done, with documented limitations · [ ] outstanding
 

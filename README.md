@@ -1,6 +1,12 @@
-# Notion Exporter (Chrome extension)
+<p align="center"><img src="public/icons/icon128.png" width="96" alt="Unfoldr icon"></p>
 
-Exports the Notion page you are viewing — plus its child pages, linked and mentioned pages, and
+# Unfoldr — offline HTML & Markdown exporter for Notion
+
+> **Unofficial.** Unfoldr is an independent personal project. It is not affiliated with, endorsed by, or
+> sponsored by Notion Labs, Inc. "Notion" is a trademark of Notion Labs, Inc., used here only to
+> describe what the extension works with. See [Disclaimers](#disclaimers).
+
+A Chrome extension that exports the Notion page you are viewing — plus its child pages, linked and mentioned pages, and
 database entries — to an **offline HTML or Markdown archive** in a ZIP. Collapsed toggle content is
 included. It runs locally in Chrome with your existing Notion login: no API integration, no server, no
 cloud services.
@@ -19,7 +25,7 @@ Load it in Chrome:
 1. Open `chrome://extensions`.
 2. Turn on **Developer mode** (top right).
 3. Click **Load unpacked** and select the `dist/` folder.
-4. Pin "Notion Exporter" from the puzzle-piece menu.
+4. Pin "Unfoldr" from the puzzle-piece menu.
 
 After rebuilding, click the reload icon on the extension's card. While editing, `npm run watch` rebuilds `dist/` automatically on every save.
 
@@ -164,7 +170,7 @@ popup ─► service worker ─► Crawler (graph keyed by page ID; queue, limit
 | Nothing downloads | Check `chrome://downloads`. Chrome's "Ask where to save each file" setting shows a dialog. |
 | External capture toggle turns itself off | The website-access permission was declined. Enable it again and accept the prompt. |
 
-To debug, open `chrome://extensions` → Notion Exporter → *Inspect views: service worker*.
+To debug, open `chrome://extensions` → Unfoldr → *Inspect views: service worker*.
 
 ## Development
 
@@ -202,3 +208,24 @@ docs/           SECURITY.md, MANUAL_TEST_CHECKLIST.md
 
 See [docs/SECURITY.md](docs/SECURITY.md) for permissions and the security model, and
 [docs/MANUAL_TEST_CHECKLIST.md](docs/MANUAL_TEST_CHECKLIST.md) for real-workspace testing.
+
+## Disclaimers
+
+- **Not affiliated with Notion.** Unfoldr is an independent, unofficial tool. It is not affiliated with,
+  endorsed by, or sponsored by Notion Labs, Inc. "Notion" and the Notion logo are trademarks of
+  Notion Labs, Inc.; the name is used only to say what Unfoldr works with.
+- **Your content, your responsibility.** Unfoldr only reads pages your own browser session can already
+  open, and only saves them to your computer. Export only content you are allowed to keep a copy of,
+  and follow [Notion's Terms](https://www.notion.com/terms) and your workspace's policies. Exported
+  archives can contain private or confidential information — store and share them accordingly.
+- **External websites** are visited only if you turn that option on. Respect those sites' terms and
+  copyright; captured copies are for your personal, offline reference.
+- **No warranty.** Unfoldr reads Notion's web interface, which can change at any time, so exports may be
+  incomplete. Always check `export-report.md`, and don't rely on Unfoldr as your only backup. The
+  software is provided "as is", without warranty of any kind — see [LICENSE](LICENSE).
+- **Privacy.** Unfoldr has no server, analytics or telemetry, and never reads or stores your cookies or
+  passwords. See [docs/SECURITY.md](docs/SECURITY.md).
+
+## License
+
+[MIT](LICENSE) © 2026 Aissa Alicaway

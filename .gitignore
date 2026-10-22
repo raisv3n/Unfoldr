@@ -4,3 +4,12 @@ dist/
 .DS_Store
 coverage/
 .e2e-profile/
+.claude/settings.local.json
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.crx
+snapshots/
+*.local.html

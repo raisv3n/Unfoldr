@@ -75,7 +75,7 @@ describe('archive builder', () => {
       `notion-export/pages/root--${ROOT}.html`,
       'notion-export/style.css',
     ]);
-    expect(out.zipBaseName).toBe('notion-export-root-20260101-0005');
+    expect(out.zipBaseName).toBe('unfoldr-root-20260101-0005');
   });
 
   it('links pages with identical titles to distinct local files and includes toggle content', async () => {
@@ -163,5 +163,15 @@ describe('ZIP generation', () => {
 
   it('refuses traversal paths', async () => {
     await expect(createZip(new Map([['notion-export/../evil.txt', 'x']]))).rejects.toThrow(/Unsafe archive path/);
+  });
+});
+
+describe('report link safety', () => {
+  it('never writes non-http(s) URLs as links', async () => {
+    const base = input();
+    const out = await buildArchive({ ...base, nodes: [...base.nodes, node('5'.repeat(32), { status: 'failed', url: 'javascript:alert(1)', error: 'x' })] });
+    const html = out.files.get('notion-export/export-report.html') as string;
+    expect(html).not.toContain('href="javascript:');
+    expect(out.reportMarkdown).not.toContain('<javascript:');
   });
 });

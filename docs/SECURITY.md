@@ -1,6 +1,6 @@
 # Security, privacy and permissions
 
-Notion Exporter runs entirely inside your Chrome profile. It has no backend, makes no analytics or
+Unfoldr runs entirely inside your Chrome profile. It has no backend, makes no analytics or
 telemetry calls, and uses no AI or cloud services. Archives are written only to your Downloads folder.
 
 ## Permissions
@@ -12,7 +12,7 @@ telemetry calls, and uses no AI or cloud services. Archives are written only to 
 | `downloads` | Save the ZIP to your Downloads folder. |
 | `offscreen` | Service workers cannot create blob URLs; an offscreen document turns the stored ZIP into a blob URL for `chrome.downloads`. |
 | Host access: `notion.so`, `*.notion.com`, `*.notion.site` | Read Notion pages in crawler tabs using your existing session. |
-| Host access: `file.notion.so`, `*.notionusercontent.com`, `*.notion-static.com`, Notion's S3 buckets | Download images and attachments. Notion's `/image/` proxy redirects to `img.notionusercontent.com`. |
+| Host access: `file.notion.so`, `*.notionusercontent.com`, `*.notion-static.com`, Notion's S3 bucket (`prod-files-secure`) and folder (`s3.us-west-2.amazonaws.com/secure.notion-static.com/`) | Download images and attachments. Notion's `/image/` proxy redirects to `img.notionusercontent.com`. |
 | Host access: `i.ytimg.com` | Download YouTube video thumbnails so embedded videos appear as clickable previews. Requests carry no cookies. |
 | Optional: `https://*/*` | **Only requested if you enable "Capture linked external websites".** Chrome shows a prompt; you can revoke it from the popup (Advanced → Revoke) or `chrome://extensions`. External hosts cannot be known in advance, so a narrower grant is not possible. |
 
@@ -21,8 +21,10 @@ Not requested: `tabs`, `cookies`, `webRequest`, `debugger`, `<all_urls>` (by def
 ## Authentication and session handling
 
 - The extension **never reads, stores or exports cookies or tokens.** Pages load in normal Chrome tabs, so
-  Notion sees the same session as when you browse. Asset requests to Notion hosts are sent with
-  `credentials: 'include'`, which lets Chrome attach your session cookies without the extension seeing them.
+  Notion sees the same session as when you browse. Asset requests to Notion's own sites (`notion.so`,
+  `*.notion.com`, `*.notion.site`, `file.notion.so`) are sent with `credentials: 'include'`, which lets
+  Chrome attach your session cookies without the extension seeing them. Requests to CDN and storage hosts
+  (Notion's S3, `notionusercontent.com`, `i.ytimg.com`) and to external sites never carry cookies.
 - No undocumented Notion API is called. Extraction reads the rendered page (DOM).
 - Inaccessible pages (login, no access, deleted, verification challenge) are reported, never bypassed.
 - Signed URL parameters (`signature`, `X-Amz-*`, `tok`, `expirationTimestamp` and similar) are removed from
@@ -32,6 +34,8 @@ Not requested: `tabs`, `cookies`, `webRequest`, `debugger`, `<all_urls>` (by def
 
 All Notion and website content is treated as untrusted:
 
+- **Markdown stays inert.** Text is Markdown-escaped, so a page can't inject HTML into viewers that render raw
+  HTML. In equations, `<` and `>` are written as TeX `\lt` / `\gt`.
 - **No markup passthrough.** Extractors read text, attributes and structure into a typed model. Renderers
   build output only from that model and escape every string (`escapeHtml` / `escapeMd`).
 - **No scripts in the archive.** Exported HTML contains no `<script>`. Every page also carries a
@@ -52,7 +56,7 @@ Every fetch goes through `checkFetchUrl` (`src/shared/url-safety.ts`):
 
 - `https:` only. Standard ports only. No credentials in URLs.
 - Host must be in the request class's allowlist (Notion hosts and `i.ytimg.com` for assets; any public
-  host only when external capture is enabled and permitted). Cookies are sent only to Notion hosts.
+  host only when external capture is enabled and permitted). Cookies are sent only to Notion's own sites.
 - Blocked: `localhost`, private and reserved IPv4 ranges (10/8, 127/8, 169.254/16 incl. cloud metadata,
   172.16/12, 192.168/16, 100.64/10, 0/8, multicast), IPv6 loopback, link-local and ULA, IPv4-mapped IPv6,
   single-label hosts, and internal suffixes (`.local`, `.internal`, `.lan`, `.home.arpa`, …).
@@ -85,3 +89,19 @@ Every fetch goes through `checkFetchUrl` (`src/shared/url-safety.ts`):
   the extension's own pages.
 - Crawling never uses your active tab. It uses a separate unfocused window (default) or inactive
   background tabs, which are closed after the export, and on restart if the service worker was killed.
+
+## Reporting a vulnerability
+
+Please report security issues privately through GitHub: **Security → Report a vulnerability** on
+[raisv3n/Unfoldr](https://github.com/raisv3n/Unfoldr/security/advisories/new). Don't open a public issue
+for it. Include the Chrome version, steps to reproduce, and, if relevant, a minimal *non-private* page
+structure that triggers the issue. This is a personal project, so responses are best effort.
+
+## Data left on your computer
+
+- The last finished ZIP stays in the extension's local storage so **Download ZIP again** works. It is
+  replaced by the next export and deleted if you remove the extension.
+- Extracted pages and assets from an unfinished export are kept until you resume or discard it.
+- The popup remembers your settings and the last export summary (page titles, URLs, report).
+- Downloaded archives in your Downloads folder can contain private workspace content. Treat them like
+  the original pages.

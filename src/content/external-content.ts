@@ -6,8 +6,8 @@ import { fetchSameOrigin } from './in-tab-fetch';
 
 declare global {
   interface Window {
-    __externalExporterInstalled?: boolean;
-    __externalExporterClicked?: WeakSet<Element>;
+    __unfoldrExternalInstalled?: boolean;
+    __unfoldrExternalClicked?: WeakSet<Element>;
   }
 }
 
@@ -24,8 +24,8 @@ function probe(): ProbeResult {
 
 /** Clicks safe accordion triggers whose panels are empty (content loaded on demand). */
 function step(maxClicks: number): StepResult {
-  window.__externalExporterClicked ??= new WeakSet();
-  const clickedSet = window.__externalExporterClicked;
+  window.__unfoldrExternalClicked ??= new WeakSet();
+  const clickedSet = window.__unfoldrExternalClicked;
   let clicked = 0;
   for (const [trigger, panel] of findAccordionPanels(document, document)) {
     if (clicked >= maxClicks) break;
@@ -48,8 +48,8 @@ function extract(url: string): ExtractResult {
   }
 }
 
-if (!window.__externalExporterInstalled) {
-  window.__externalExporterInstalled = true;
+if (!window.__unfoldrExternalInstalled) {
+  window.__unfoldrExternalInstalled = true;
   chrome.runtime.onMessage.addListener((msg: ContentCommand, _sender, sendResponse) => {
     if (!msg || msg.target !== 'external-content') return false;
     switch (msg.cmd) {

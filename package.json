@@ -1,8 +1,8 @@
 {
-  "name": "notion-exporter-extension",
+  "name": "unfoldr",
   "version": "0.1.0",
   "private": true,
-  "description": "Personal-use Chrome extension that exports Notion pages and connected content to an offline HTML or Markdown ZIP archive.",
+  "description": "Unfoldr — offline HTML & Markdown exporter for Notion (Chrome extension). Not affiliated with Notion Labs, Inc.",
   "type": "module",
   "scripts": {
     "build": "npm run typecheck && vite build && node scripts/build-content.mjs",
@@ -20,7 +20,7 @@
     "puppeteer-core": "25.15.0",
     "typescript": "5.9.3",
     "vite": "7.3.7",
-    "vitest": "3.2.7"
+    "vitest": "5.0.5"
   },
   "dependencies": {
     "jszip": "3.10.1"
