@@ -183,7 +183,7 @@ src/
   popup/, offscreen/
 public/manifest.json, popup.html, offscreen.html
 tests/          unit tests + sanitized synthetic fixtures
-scripts/        build-content.mjs (IIFE content scripts), e2e-smoke.mjs, make-icons.mjs
+scripts/        build-content.mjs (IIFE content scripts), e2e-smoke.mjs, watch.mjs, make-icons.py (icons from icon.png)
 docs/           SECURITY.md, MANUAL_TEST_CHECKLIST.md
 ```
 
