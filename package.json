@@ -9,7 +9,8 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.node.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "node scripts/e2e-smoke.mjs"
+    "e2e": "node scripts/e2e-smoke.mjs",
+    "watch": "node scripts/watch.mjs"
   },
   "devDependencies": {
     "@types/chrome": "0.3.6",

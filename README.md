@@ -21,7 +21,7 @@ Load it in Chrome:
 3. Click **Load unpacked** and select the `dist/` folder.
 4. Pin "Notion Exporter" from the puzzle-piece menu.
 
-After rebuilding, click the reload icon on the extension's card.
+After rebuilding, click the reload icon on the extension's card. While editing, `npm run watch` rebuilds `dist/` automatically on every save.
 
 ## Use
 
